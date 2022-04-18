@@ -28,7 +28,7 @@ runs:
       id: phpstan
       shell: bash
       run: |
-        vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || return true
+        vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "::set-output name=errorCount::$errorCount"
         echo "::set-output name=results::$(cat ${{ inputs.output-file }})"
