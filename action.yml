@@ -12,27 +12,32 @@ inputs:
 outputs:
   errorCount:
     description: Number of errors found
+    value: ${{ steps.phpstan.outputs.errorCount }}
   results:
     description: JSON formatted results
+    value: ${{ steps.phpstan.outputs.results }}
   results-md:
     description: A markdown representation of the results for PR comments or emails
+    value: ${{ steps.phpstan-markdown.outputs.results-md }}
 
 runs:
   using: 'composite'
   steps:
 
     - name: Run PHPStan
+      id: phpstan
       shell: bash
-      runs: |
+      run: |
         vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || return true
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "::set-output name=errorCount::$errorCount"
         echo "::set-output name=results::$(cat ${{ inputs.output-file }})"
 
     # TODO: Update this to be pretty markdown
-    - name: Generate PR Comment
+    - name: Generate Markdown
+      id: phpstan-markdown
       shell: bash
-      runs: |
+      run: |
         payload=$(cat ${{ inputs.output-file }} | jq)
         payload="${payload//'%'/'%25'}"
         payload="${payload//$'\n'/'%0A'}"
