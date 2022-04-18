@@ -1,0 +1,40 @@
+name: NewRelic ECS Release Markers
+description: Reads a Task Definition and sends a release marker to NewRelic
+
+inputs:
+  output-file:
+    description: The output file
+    required: true
+  args:
+    description: Additional arguments
+    required: false
+
+outputs:
+  errorCount:
+    description: Number of errors found
+  results:
+    description: JSON formatted results
+  results-md:
+    description: A markdown representation of the results for PR comments or emails
+
+runs:
+  using: 'composite'
+  steps:
+
+    - name: Run PHPStan
+      shell: bash
+      runs: |
+        vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || return true
+        errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
+        echo "::set-output name=errorCount::$errorCount"
+        echo "::set-output name=results::$(cat ${{ inputs.output-file }})"
+
+    # TODO: Update this to be pretty markdown
+    - name: Generate PR Comment
+      shell: bash
+      runs: |
+        payload=$(cat ${{ inputs.output-file }} | jq)
+        payload="${payload//'%'/'%25'}"
+        payload="${payload//$'\n'/'%0A'}"
+        payload="${payload//$'\r'/'%0D'}"
+        echo "::set-output name=results-md::$payload"
