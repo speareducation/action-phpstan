@@ -38,7 +38,16 @@ runs:
       id: phpstan-markdown
       shell: bash
       run: |
-        payload=$(cat ${{ inputs.output-file }} | jq)
+        payload=$(cat ${{ inputs.output-file }} | jq -r '.files | to_entries | map(
+          ("*" + (.key|tostring) + "*"),
+          (
+            .value.messages | map(
+              ("- Line " + (.line|tostring) + ": " + (.message|tostring))
+            )[]
+          ),
+          ""
+        )[]')
+        # escape payload so it can be sent through output
         payload="${payload//'%'/'%25'}"
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
