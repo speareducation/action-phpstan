@@ -39,7 +39,7 @@ runs:
       shell: bash
       run: |
         payload=$(cat ${{ inputs.output-file }} | jq -r '.files | to_entries | map(
-          ("*" + (.key|tostring) + "*"),
+          ("**" + (.key|tostring) + "**"),
           (
             .value.messages | map(
               ("- Line " + (.line|tostring) + ": " + (.message|tostring))
