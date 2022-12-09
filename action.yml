@@ -30,8 +30,8 @@ runs:
       run: |
         vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
-        echo "::set-output name=errorCount::$errorCount"
-        echo "::set-output name=results::$(cat ${{ inputs.output-file }})"
+        echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
+        echo "results=$(cat ${{ inputs.output-file }})" >> ${GITHUB_OUTPUT}
 
     # TODO: Update this to be pretty markdown
     - name: Generate Markdown
@@ -54,4 +54,4 @@ runs:
         payload="${payload//'%'/'%25'}"
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
-        echo "::set-output name=results-md::${payload:-No errors found.}"
+        echo "results-md=${payload:-No errors found.}" >> ${GITHUB_OUTPUT}
