@@ -2,6 +2,9 @@ name: NewRelic ECS Release Markers
 description: Reads a Task Definition and sends a release marker to NewRelic
 
 inputs:
+  run-in-container:
+    description: (Bool) Whether to run the command inside of the docker container
+    required: false
   output-file:
     description: The output file
     required: true
@@ -10,9 +13,9 @@ inputs:
     required: false
 
 outputs:
-  errorCount:
+  error-count:
     description: Number of errors found
-    value: ${{ steps.phpstan.outputs.errorCount }}
+    value: ${{ steps.phpstan.outputs.error-count }}
   results:
     description: JSON formatted results
     value: ${{ steps.phpstan.outputs.results }}
@@ -21,17 +24,27 @@ outputs:
     value: ${{ steps.phpstan-markdown.outputs.results-md }}
 
 runs:
-  using: 'composite'
+  using: composite
+  env:
+    PHPSTAN_COMMAND: 'vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :'
   steps:
 
-    - name: Run PHPStan
+    - if: inputs.run-in-container
+      uses: speareducation/action-docker-exec@main
+      with:
+        command: ${{ env.PHPSTAN_COMMAND }}
+
+    - if: '!inputs.run-in-container'
+      shell: bash
+      run: bash -c $PHPSTAN_COMMAND
+
+    - name: Process Results
       id: phpstan
       shell: bash
       run: |
-        vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
-        echo "::set-output name=errorCount::$errorCount"
-        echo "::set-output name=results::$(cat ${{ inputs.output-file }})"
+        echo "error-count=$errorCount" >> $GITHUB_OUTPUT
+        echo "results=$(cat ${{ inputs.output-file }})" >> $GITHUB_OUTPUT
 
     # TODO: Update this to be pretty markdown
     - name: Generate Markdown
@@ -54,4 +67,4 @@ runs:
         payload="${payload//'%'/'%25'}"
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
-        echo "::set-output name=results-md::${payload:-No errors found.}"
+        echo "results-md=${payload:-No errors found.}" >> $GITHUB_OUTPUT
