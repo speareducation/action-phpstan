@@ -22,22 +22,20 @@ outputs:
   results-md:
     description: A markdown representation of the results for PR comments or emails
     value: ${{ steps.phpstan-markdown.outputs.results-md }}
-
 runs:
   using: composite
   env:
     PHPSTAN_COMMAND: 'vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :'
-
   steps:
     - if: inputs.run-in-container
+      name: Run PHPStan In container
       uses: speareducation/action-docker-exec@main
       with:
         command: ${{ env.PHPSTAN_COMMAND }}
-
     - if: '!inputs.run-in-container'
+      name: Run PHPStan
       shell: bash
       run: bash -c $PHPSTAN_COMMAND
-
     - name: Process Results
       id: phpstan
       shell: bash
@@ -45,12 +43,10 @@ runs:
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
         echo "results=$(cat ${{ inputs.output-file }})" >> ${GITHUB_OUTPUT}
-
     - name: Generate Markdown
       id: phpstan-markdown
       shell: bash
       run: echo "results-md=# PHPStan results currently disabled pending DEVOPS-572" >> ${GITHUB_OUTPUT}
-
     # # TODO: Update this to be pretty markdown
     # - name: Generate Markdown
     #   id: phpstan-markdown
