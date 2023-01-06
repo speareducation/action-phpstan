@@ -67,4 +67,5 @@ runs:
         payload="${payload//'%'/'%25'}"
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
-        echo "results-md=${payload:-No errors found.}" >> $GITHUB_OUTPUT
+        #echo "results-md=${payload:-No errors found.}" >> $GITHUB_OUTPUT
+        echo "results-md=#PHPStan results currently disabled"
