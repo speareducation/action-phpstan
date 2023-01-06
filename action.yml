@@ -23,19 +23,17 @@ outputs:
     description: A markdown representation of the results for PR comments or emails
     value: ${{ steps.phpstan-markdown.outputs.results-md }}
 runs:
-  using: composite
-  env:
-    PHPSTAN_COMMAND: 'vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :'
+  using: 'composite'
   steps:
     - if: inputs.run-in-container
       name: Run PHPStan In container
       uses: speareducation/action-docker-exec@main
       with:
-        command: ${{ env.PHPSTAN_COMMAND }}
+        command: 'vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :'
     - if: '!inputs.run-in-container'
       name: Run PHPStan
       shell: bash
-      run: bash -c $PHPSTAN_COMMAND
+      run: bash -c 'vendor/bin/phpstan --memory-limit=1G --error-format=json ${{ inputs.args }} > ${{ inputs.output-file }} || :'
     - name: Process Results
       id: phpstan
       shell: bash
