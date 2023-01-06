@@ -43,8 +43,8 @@ runs:
       shell: bash
       run: |
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
-        echo "error-count=$errorCount" >> $GITHUB_OUTPUT
-        echo "results=$(cat ${{ inputs.output-file }})" >> $GITHUB_OUTPUT
+        echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
+        echo "results=$(cat ${{ inputs.output-file }})" >> ${GITHUB_OUTPUT}
 
     # TODO: Update this to be pretty markdown
     - name: Generate Markdown
@@ -67,5 +67,5 @@ runs:
         payload="${payload//'%'/'%25'}"
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
-        #echo "results-md=${payload:-No errors found.}" >> $GITHUB_OUTPUT
-        echo "results-md=#PHPStan results currently disabled"
+        #echo "results-md=${payload:-No errors found.}" >> ${GITHUB_OUTPUT}
+        echo "results-md=#PHPStan results currently disabled pending DEVOPS-572" >> ${GITHUB_OUTPUT}
