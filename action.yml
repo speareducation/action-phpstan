@@ -40,7 +40,9 @@ runs:
       run: |
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
-        echo "results=$(cat ${{ inputs.output-file }})" >> ${GITHUB_OUTPUT}
+        echo "results=<<EOT" >> ${GITHUB_OUTPUT}
+        cat ${{ inputs.output-file }} >> ${GITHUB_OUTPUT}
+        echo "EOT" >> ${GITHUB_OUTPUT}
     # TODO: Update this to be pretty markdown
     - name: Generate Markdown
       id: phpstan-markdown
