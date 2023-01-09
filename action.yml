@@ -41,29 +41,27 @@ runs:
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
         echo "results=$(cat ${{ inputs.output-file }})" >> ${GITHUB_OUTPUT}
+    # TODO: Update this to be pretty markdown
     - name: Generate Markdown
       id: phpstan-markdown
       shell: bash
-      run: echo "results-md=# PHPStan results currently disabled pending DEVOPS-572" >> ${GITHUB_OUTPUT}
-    # # TODO: Update this to be pretty markdown
-    # - name: Generate Markdown
-    #   id: phpstan-markdown
-    #   shell: bash
-    #   run: |
-    #     tmpFile=$(mktemp)
-    #     echo '# PHPStan Results' >> $tmpFile
-    #     cat ${{ inputs.output-file }} | jq -r '.files | to_entries | map(
-    #       ("**" + (.key|tostring) + "**"),
-    #       (
-    #         .value.messages | map(
-    #           ("- Line " + (.line|tostring) + ": " + (.message|tostring))
-    #         )[]
-    #       ),
-    #       ""
-    #     )[]' >> $tmpFile
-    #     payload=$(cat $tmpFile)
-    #     # escape payload so it can be sent through output
-    #     payload="${payload//'%'/'%25'}"
-    #     payload="${payload//$'\n'/'%0A'}"
-    #     payload="${payload//$'\r'/'%0D'}"
-    #     echo "results-md=${payload:-No errors found.}" >> ${GITHUB_OUTPUT}
+      run: |
+        tmpFile=$(mktemp)
+        echo '# PHPStan Results' >> $tmpFile
+        cat ${{ inputs.output-file }} | jq -r '.files | to_entries | map(
+          ("**" + (.key|tostring) + "**"),
+          (
+            .value.messages | map(
+              ("- Line " + (.line|tostring) + ": " + (.message|tostring))
+            )[]
+          ),
+          ""
+        )[]' >> $tmpFile
+        payload=$(cat $tmpFile)
+        # escape payload so it can be sent through output
+        payload="${payload//'%'/'%25'}"
+        payload="${payload//$'\n'/'%0A'}"
+        payload="${payload//$'\r'/'%0D'}"
+        echo "results-md=<<EOT" >> ${GITHUB_OUTPUT}
+        echo "${payload:-No errors found.}" >> ${GITHUB_OUTPUT}
+        echo "EOT" >> ${GITHUB_OUTPUT}
