@@ -16,9 +16,6 @@ outputs:
   error-count:
     description: Number of errors found
     value: ${{ steps.phpstan.outputs.error-count }}
-  results:
-    description: JSON formatted results
-    value: ${{ steps.phpstan.outputs.results }}
   results-md:
     description: A markdown representation of the results for PR comments or emails
     value: ${{ steps.phpstan-markdown.outputs.results-md }}
@@ -40,9 +37,7 @@ runs:
       run: |
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
-        echo "results<<EOT" >> ${GITHUB_OUTPUT}
-        cat ${{ inputs.output-file }} >> ${GITHUB_OUTPUT} || true
-        echo "EOT" >> ${GITHUB_OUTPUT}
+
     # TODO: Update this to be pretty markdown
     - name: Generate Markdown
       id: phpstan-markdown
