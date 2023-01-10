@@ -41,7 +41,7 @@ runs:
         errorCount=$(jq -r .totals.file_errors ${{ inputs.output-file }})
         echo "errorCount=$errorCount" >> ${GITHUB_OUTPUT}
         echo "results<<EOT" >> ${GITHUB_OUTPUT}
-        cat ${{ inputs.output-file }} >> ${GITHUB_OUTPUT}
+        cat ${{ inputs.output-file }} >> ${GITHUB_OUTPUT} || true
         echo "EOT" >> ${GITHUB_OUTPUT}
     # TODO: Update this to be pretty markdown
     - name: Generate Markdown
@@ -65,5 +65,5 @@ runs:
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
         echo "results-md<<EOT" >> ${GITHUB_OUTPUT}
-        echo "${payload:-No errors found.}" >> ${GITHUB_OUTPUT}
+        echo "$payload" >> ${GITHUB_OUTPUT}
         echo "EOT" >> ${GITHUB_OUTPUT}
