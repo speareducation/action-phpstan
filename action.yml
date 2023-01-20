@@ -60,5 +60,5 @@ runs:
         payload="${payload//$'\n'/'%0A'}"
         payload="${payload//$'\r'/'%0D'}"
         echo "results-md<<EOT" >> ${GITHUB_OUTPUT}
-        echo $payload >> ${GITHUB_OUTPUT}
+        echo "$payload" >> ${GITHUB_OUTPUT}
         echo "EOT" >> ${GITHUB_OUTPUT}
